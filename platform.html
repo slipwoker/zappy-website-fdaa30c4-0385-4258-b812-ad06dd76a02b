@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>פלטפורמת ניהול אימונים מתקדמת — מעקב כש&quot;ג ייעודית</title>
+    <meta name="description" content="גלה מערכת ניהול מתאמנים אונליין עם ממשק דמוי גיליון אלקטרוני, מעקב אחר תאריכי השלמת תרגילים וחישוב אוטומטי של שימוש בציוד. התחל לעקוב היום!">
+    <meta name="keywords" content="מערכת ניהול מתאמנים אונליין, פלטפורמת מעקב אימונים, ממשק ניהול תרגילים, מעקב שימוש בציוד, תוכנת אימונים אישיים">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Zappy Analytics -->
+<script>
+(function() {
+  'use strict';
+  
+  // Configuration
+  var config = {
+    websiteId: 'fdaa30c4-0385-4258-b812-ad06dd76a02b',
+    apiUrl: 'https://api.zappy5.com/api/analytics/track',
+    sessionDuration: 30 * 60 * 1000, // 30 minutes
+    visitorDuration: 30 * 24 * 60 * 60 * 1000, // 30 days
+    trackPageViews: true,
+    trackClicks: true,
+    trackFormSubmissions: true
+  };
+  
+  // Generate or retrieve persistent visitor ID (30 days)
+  function getVisitorId() {
+    var visitorKey = 'zappy_visitor_' + config.websiteId;
+    var visitor = null;
+    
+    try {
+      visitor = localStorage.getItem(visitorKey);
+      if (visitor) {
+        var visitorData = JSON.parse(visitor);
+        var now = Date.now();
+        
+        // Check if visitor ID is still valid (30 days)
+        if (now - visitorData.created < config.visitorDuration) {
+          // Update last seen timestamp
+          visitorData.lastSeen = now;
+          localStorage.setItem(visitorKey, JSON.stringify(visitorData));
+          return visitorData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: LocalStorage not available');
+    }
+    
+    // Generate new visitor ID
+    var newVisitorId = 'zv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      localStorage.setItem(visitorKey, JSON.stringify({
+        id: newVisitorId,
+        created: Date.now(),
+        lastSeen: Date.now()
+      }));
+    } catch (e) {
+      // Continue without local storage
+    }
+    
+    return newVisitorId;
+  }
+  
+  // Generate or retrieve session ID (30 minutes)
+  function getSessionId() {
+    var sessionKey = 'zappy_session_' + config.websiteId;
+    var session = null;
+    
+    try {
+      session = sessionStorage.getItem(sessionKey);
+      if (session) {
+        var sessionData = JSON.parse(session);
+        var now = Date.now();
+        
+        // Check if session is still valid
+        if (now - sessionData.timestamp < config.sessionDuration) {
+          // Update timestamp
+          sessionData.timestamp = now;
+          sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+          return sessionData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: SessionStorage not available');
+    }
+    
+    // Generate new session ID
+    var newSessionId = 'zs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        id: newSessionId,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      // Continue without session storage
+    }
+    
+    return newSessionId;
+  }
+  
+  var visitorId = getVisitorId();
+  var sessionId = getSessionId();
+  
+  // Track an event
+  function trackEvent(eventType, data) {
+    data = data || {};
+    
+    var eventData = {
+      website_id: config.websiteId,
+      event_type: eventType,
+      page_path: window.location.pathname,
+      referrer: document.referrer || 'direct',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      metadata: data
+    };
+    
+    // Use sendBeacon if available (better for page unload events)
+    if (navigator.sendBeacon) {
+      var blob = new Blob([JSON.stringify(eventData)], { type: 'application/json' });
+      navigator.sendBeacon(config.apiUrl, blob);
+    } else {
+      // Fallback to fetch
+      fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventData),
+        keepalive: true
+      }).catch(function(error) {
+        console.warn('Zappy Analytics: Failed to track event', error);
+      });
+    }
+  }
+  
+  // Track page view
+  if (config.trackPageViews) {
+    trackEvent('pageview', {
+      title: document.title,
+      url: window.location.href
+    });
+  }
+  
+  // Track clicks on important elements
+  if (config.trackClicks) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      
+      // Track button clicks (counted as actions)
+      if (target.tagName === 'BUTTON' || target.closest('button')) {
+        var button = target.tagName === 'BUTTON' ? target : target.closest('button');
+        trackEvent('click', {
+          element: 'button',
+          text: button.textContent.trim().substring(0, 100),
+          id: button.id || null,
+          class: button.className || null
+        });
+      }
+      
+      // Track link clicks (navigation - not counted as actions)
+      else if (target.tagName === 'A' || target.closest('a')) {
+        var link = target.tagName === 'A' ? target : target.closest('a');
+        trackEvent('navigation', {
+          element: 'link',
+          text: link.textContent.trim().substring(0, 100),
+          href: link.href,
+          external: link.hostname !== window.location.hostname
+        });
+      }
+    }, true);
+  }
+  
+  // Track form submissions
+  if (config.trackFormSubmissions) {
+    document.addEventListener('submit', function(e) {
+      var form = e.target;
+      
+      trackEvent('form_submit', {
+        form_id: form.id || null,
+        form_name: form.name || null,
+        form_action: form.action || null,
+        form_method: form.method || 'GET'
+      });
+    }, true);
+  }
+  
+  // Track time on page (send on page unload)
+  var pageLoadTime = Date.now();
+  
+  window.addEventListener('beforeunload', function() {
+    var timeOnPage = Math.floor((Date.now() - pageLoadTime) / 1000); // in seconds
+    
+    trackEvent('page_unload', {
+      time_on_page: timeOnPage,
+      page_path: window.location.pathname
+    });
+  });
+  
+  // Expose tracking function globally for custom events
+  window.zappyAnalytics = {
+    track: trackEvent,
+    getVisitorId: function() { return visitorId; },
+    getSessionId: function() { return sessionId; }
+  };
+  
+})();
+</script>
+<!-- End Zappy Analytics -->
+    <meta property="og:title" content="פלטפורמת ניהול אימונים מתקדמת — מעקב כש&quot;ג ייעודית">
+  <meta property="og:description" content="גלה מערכת ניהול מתאמנים אונליין עם ממשק דמוי גיליון אלקטרוני, מעקב אחר תאריכי השלמת תרגילים וחישוב אוטומטי של שימוש בציוד. התחל לעקוב היום!">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="he_IL">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="פלטפורמת ניהול אימונים מתקדמת — מעקב כש&quot;ג ייעודית">
+  <meta name="twitter:description" content="גלה מערכת ניהול מתאמנים אונליין עם ממשק דמוי גיליון אלקטרוני, מעקב אחר תאריכי השלמת תרגילים וחישוב אוטומטי של שימוש בציוד. התחל לעקוב היום!">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Cookie Consent -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css">
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+    <!-- Mickidum Accessibility Toolbar -->
+    <script src="https://cdn.jsdelivr.net/gh/mickidum/acc_toolbar/acctoolbar/acctoolbar.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+
+    <style id="zappy-dropdown-submenu-styles">
+      /* ========== DESKTOP DROPDOWN SUBMENU STYLES ========== */
+      /* Base styles for dropdown submenus - parent must be positioned */
+      .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { position: relative; }
+      /* Submenu base - hidden by default */
+      .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { display: block !important; position: absolute !important; top: 100%; left: 0; min-width: 220px; background: white; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); padding: 8px 0; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease; z-index: 1000; list-style: none; pointer-events: none; }
+      /* CRITICAL: Desktop hover styles to show dropdown */
+      .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Submenu item styling */
+      .sub-menu li { list-style: none; margin: 0; padding: 0; }
+      .sub-menu a { display: block !important; padding: 10px 16px !important; color: #333 !important; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background-color 0.2s; }
+      .sub-menu a:hover { background-color: #f5f5f5; }
+      /* RTL (Hebrew/Arabic) dropdown positioning */
+      [dir="rtl"] .nav-menu .sub-menu, [dir="rtl"] nav .sub-menu, [dir="rtl"] .navbar .sub-menu, html[lang="he"] .nav-menu .sub-menu, html[lang="he"] nav .sub-menu, html[lang="he"] .navbar .sub-menu, html[lang="ar"] .nav-menu .sub-menu, html[lang="ar"] nav .sub-menu, html[lang="ar"] .navbar .sub-menu { left: auto !important; right: 0 !important; }
+      /* Hide empty dropdown menus */
+      .sub-menu:empty, .sub-menu:not(:has(li:not(.zappy-hidden-menu-item))), .sub-menu:not(:has(li)) { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+      /* Desktop: show submenu on Menu Group hover */
+      li:has(.menu-group-title):hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Menu Group title styling */
+      .nav-menu > li > .menu-group-title, #navMenu > li > .menu-group-title { display: inline-block; padding: 0.5rem 1rem; cursor: default; user-select: none; }
+      
+      /* ========== MOBILE SUBMENU STYLES ========== */
+      @media (max-width: 768px) {
+        .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { position: static !important; transform: none !important; box-shadow: none !important; background: transparent !important; max-height: 0; overflow: hidden; opacity: 0; visibility: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; padding: 0 !important; border-radius: 0 !important; }
+        .sub-menu.mobile-expanded { max-height: 500px !important; opacity: 1 !important; visibility: visible !important; padding: 8px 0 8px 16px !important; }
+        [dir="rtl"] .sub-menu.mobile-expanded, html[lang="he"] .sub-menu.mobile-expanded { padding: 8px 16px 8px 0 !important; }
+        /* Disable hover behavior on mobile */
+        .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 0; visibility: hidden; pointer-events: none; }
+        .nav-menu li > .sub-menu.mobile-expanded, nav li > .sub-menu.mobile-expanded, .navbar li > .sub-menu.mobile-expanded, #navMenu li > .sub-menu.mobile-expanded { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+        .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; position: relative !important; min-height: 44px !important; }
+        .nav-menu li:has(.sub-menu) > a, nav li:has(.sub-menu) > a, .navbar li:has(.sub-menu) > a, #navMenu li:has(.sub-menu) > a { flex: 1 !important; min-width: 0 !important; }
+        .nav-menu li:has(.sub-menu) > .menu-group-title, nav li:has(.sub-menu) > .menu-group-title, .navbar li:has(.sub-menu) > .menu-group-title, #navMenu li:has(.sub-menu) > .menu-group-title { flex: 1 !important; min-width: 0 !important; padding: 0 !important; line-height: inherit !important; }
+        .nav-menu li:has(.sub-menu) > .sub-menu, nav li:has(.sub-menu) > .sub-menu, .navbar li:has(.sub-menu) > .sub-menu, #navMenu li:has(.sub-menu) > .sub-menu { flex-basis: 100% !important; width: 100% !important; }
+        .nav-menu li:has(.sub-menu) > a [class*="chevron"], .nav-menu li:has(.sub-menu) > a [class*="arrow"], .nav-menu li:has(.sub-menu) > a .fa-chevron-down, .nav-menu li:has(.sub-menu) > a .fa-angle-down, nav li:has(.sub-menu) > a [class*="chevron"], nav li:has(.sub-menu) > a [class*="arrow"], #navMenu li:has(.sub-menu) > a [class*="chevron"], #navMenu li:has(.sub-menu) > a [class*="arrow"] { display: none !important; visibility: hidden !important; }
+        .mobile-submenu-toggle { display: flex !important; align-items: center !important; justify-content: center !important; width: 44px !important; height: auto !important; background: transparent !important; border: none !important; cursor: pointer !important; color: var(--text-dark) !important; position: static !important; flex-shrink: 0 !important; align-self: stretch !important; z-index: 2 !important; padding: 0 !important; margin: 0 !important; }
+        .mobile-submenu-toggle::after { content: '' !important; width: 0 !important; height: 0 !important; border-left: 6px solid transparent !important; border-right: 6px solid transparent !important; border-top: 7px solid currentColor !important; transition: transform 0.3s ease !important; }
+        .mobile-submenu-toggle.expanded::after { transform: rotate(180deg) !important; }
+        .sub-menu a { padding: 10px 0 !important; display: block !important; color: var(--text-dark) !important; }
+        .navbar .sub-menu li a, nav.navbar .sub-menu li a, .zappy-products-dropdown .sub-menu a { color: var(--text-dark) !important; }
+      }
+      @media (min-width: 769px) { .mobile-submenu-toggle { display: none !important; } }
+    </style>
+
+    <style id="zappy-widget-visibility">
+      #mic-access-tool-general-button, .mic-access-tool-general-button,
+      #mic-init-access-tool .mic-access-tool-general-button, #mic-init-access-tool #mic-access-tool-general-button,
+      ._access-icon, #mic-access-tool-box, .mic-access-tool-box,
+      #mic-init-access-tool #mic-access-tool-box, div[id*="mic-access-tool-box"], ._access-menu {
+        display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;
+      }
+    </style>
+</head>
+<body>
+
+  <nav class="navbar" dir="rtl">
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+    <svg class="hamburger-icon" width="24" height="24" viewbox="0 0 24 24" fill="none">
+      <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+    <svg class="close-icon" width="24" height="24" viewbox="0 0 24 24" fill="none" style="display:none;">
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+  </button>
+  
+  <button class="phone-header-btn" aria-label="Call">
+    <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+    </svg>
+  </button>
+  
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="/" class="logo-link">
+        <img src="/assets/business-logo.webp" alt="מעקב כש&quot;ג ייעודית" class="logo">
+      </a>
+    </div>
+    
+    <ul class="nav-menu" id="navMenu"><li><a href="/platform">פלטפורמה</a></li><li><a href="/about">אודות</a></li></ul>
+    
+    <div class="nav-cta-container">
+      <a href="/contact" class="nav-cta-btn">צור קשר</a>
+    </div>
+  </div>
+</nav>
+  
+  <main>
+    <section class="platform-intro-section" data-layout-spec="פלטפורמה-intro">
+  <div class="platform-intro-container">
+    <div class="platform-intro-content">
+      <h1 class="platform-intro-title">יומן אימונים שנשאר מסודר.</h1>
+      <p class="platform-intro-description">מעוצב כמו גיליון חכם: תרגילים, תאריכי השלמה, ואיתותים אוטומטיים על זמן שלא נגעת בציוד.</p>
+      <a href="/contact" class="platform-intro-cta btn-primary">
+        <span>צור קשר</span>
+        <svg width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 8H2M2 8L8 2M2 8L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </a>
+    </div>
+
+    <div class="platform-intro-cards">
+      <div class="platform-intro-card">
+        <div class="platform-intro-card-icon">
+          <svg data-element-type="icon" data-icon-type="svg" width="48" height="48" viewbox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="12" width="32" height="24" rx="2" stroke="currentColor" stroke-width="2"></rect>
+            <line x1="8" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="2"></line>
+            <line x1="16" y1="12" x2="16" y2="36" stroke="currentColor" stroke-width="2"></line>
+            <circle cx="24" cy="28" r="2" fill="var(--accent)"></circle>
+            <circle cx="32" cy="28" r="2" fill="var(--accent)"></circle>
+          </svg>
+        </div>
+        <h3 class="platform-intro-card-title">תיעוד</h3>
+        <p class="platform-intro-card-text">כל תרגיל מתועד עם תאריך השלמה מדויק. המערכת שומרת היסטוריה מלאה של כל מה שעשית, מאורגן בשורות וטורים ברורים כמו גיליון עבודה חכם.</p>
+      </div>
+
+      <div class="platform-intro-card">
+        <div class="platform-intro-card-icon">
+          <svg data-element-type="icon" data-icon-type="svg" width="48" height="48" viewbox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="2"></circle>
+            <path d="M24 14V24L30 30" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"></path>
+            <circle cx="38" cy="12" r="4" fill="var(--primary)"></circle>
+            <line x1="36" y1="10" x2="40" y2="14" stroke="var(--bg-dark)" stroke-width="1.5" stroke-linecap="round"></line>
+          </svg>
+        </div>
+        <h3 class="platform-intro-card-title">מעקב</h3>
+        <p class="platform-intro-card-text">המערכת מחשבת אוטומטית כמה ימים עברו מאז הפעם האחרונה שהשתמשת בכל ציוד. קבל התראות ויזואליות על ציוד שזקוק לתשומת לב – כמו נורות אזהרה בלוח בקרה.</p>
+      </div>
+
+      <div class="platform-intro-card">
+        <div class="platform-intro-card-icon">
+          <svg data-element-type="icon" data-icon-type="svg" width="48" height="48" viewbox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="10" width="36" height="28" rx="2" stroke="currentColor" stroke-width="2"></rect>
+            <path d="M12 18L18 24L28 14" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <line x1="12" y1="30" x2="36" y2="30" stroke="currentColor" stroke-width="1.5"></line>
+            <circle cx="16" cy="34" r="1.5" fill="var(--primary)"></circle>
+            <circle cx="24" cy="34" r="1.5" fill="var(--primary)"></circle>
+            <circle cx="32" cy="34" r="1.5" fill="var(--primary)"></circle>
+          </svg>
+        </div>
+        <h3 class="platform-intro-card-title">סקירה</h3>
+        <p class="platform-intro-card-text">צפה בהתקדמות שלך בפריסה נקייה וקלה לקריאה. כל מתאמן מקבל תצוגה אישית של היסטוריית האימונים שלו, עם אפשרות לסנן, לחפש ולזהות דפוסים במהירות.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="platform-intro-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 1200 60" preserveaspectratio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 L0,30 Q150,28 300,32 T600,28 Q750,32 900,30 T1200,32 L1200,60 Z" fill="var(--bg-light)"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="platform-features-section" data-layout-spec="פלטפורמה-features">
+  <div class="platform-features-container">
+    <div class="platform-features-header">
+      <h2>בנוי למען בהירות ועקביות.</h2>
+      <p>הכל מאורגן כדי להפחית עמימות בהיסטוריית האימונים ולהבליט פערים בקלות.</p>
+    </div>
+
+    <div class="platform-features-grid">
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="10" width="28" height="4" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <rect x="6" y="18" width="20" height="4" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <rect x="6" y="26" width="24" height="4" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+        </svg>
+        <h3>קטלוג תרגילים לכל מתאמן</h3>
+        <p>כל מתאמן מקבל רשימה ייעודית של תרגילים שמתעדכנת ונשמרת בממשק פשוט ונגיש.</p>
+      </div>
+
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="8" width="24" height="24" rx="3" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <path d="M8 16H32" stroke="currentColor" stroke-width="2"></path>
+          <circle cx="14" cy="12" r="1.5" fill="currentColor"></circle>
+          <path d="M18 22L22 26L28 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <h3>מעקב תאריכי השלמה</h3>
+        <p>כל אימון מתועד עם תאריך מדויק, כך שתמיד תדעו מתי בוצע כל תרגיל בפעם האחרונה.</p>
+      </div>
+
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="12" stroke="currentColor" stroke-width="2" fill="none"></circle>
+          <path d="M20 14V20L24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M12 8L10 6M28 8L30 6M8 28L6 30M32 28L34 30" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+        <h3>חישוב ימים מאז שימוש אוטומטי</h3>
+        <p>המערכת מחשבת באופן אוטומטי כמה ימים עברו מאז השימוש האחרון בכל ציוד או תרגיל.</p>
+      </div>
+
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="8" width="20" height="24" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <circle cx="20" cy="18" r="4" stroke="currentColor" stroke-width="2" fill="none"></circle>
+          <path d="M16 26H24" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+        <h3>ניטור שימוש בציוד</h3>
+        <p>עקבו אחר דפוסי שימוש בציוד שונה וזהו פערים בתכנית האימונים בקלות.</p>
+      </div>
+
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="10" width="24" height="20" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <path d="M12 16H28M12 20H24M12 24H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+        <h3>הערות שנשארות מחוברות לאימונים</h3>
+        <p>כל הערה או הנחיה נשארת מקושרת לאימון הספציפי ונגישה בכל עת.</p>
+      </div>
+
+      <div class="platform-feature-tile">
+        <div class="platform-feature-corner-marker" aria-hidden="true"></div>
+        <svg class="platform-feature-icon" data-element-type="icon" data-icon-type="svg" width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="8" width="28" height="24" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+          <path d="M14 8V6M26 8V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <rect x="10" y="16" width="4" height="4" rx="1" fill="currentColor"></rect>
+          <rect x="18" y="16" width="4" height="4" rx="1" fill="currentColor"></rect>
+          <rect x="26" y="16" width="4" height="4" rx="1" fill="currentColor"></rect>
+          <rect x="10" y="24" width="4" height="4" rx="1" fill="currentColor"></rect>
+          <rect x="18" y="24" width="4" height="4" rx="1" fill="currentColor"></rect>
+        </svg>
+        <h3>היסטוריה קריאה בכל קנה מידה</h3>
+        <p>ממשק דמוי גיליון נתונים שמאפשר לראות את כל ההיסטוריה בבהירות מקסימלית.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="platform-features-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 1200 60" preserveaspectratio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 L0,30 L40,30 L40,25 L80,25 L80,30 L120,30 L120,20 L160,20 L160,30 L200,30 L200,25 L240,25 L240,30 L280,30 L280,35 L320,35 L320,30 L360,30 L360,25 L400,25 L400,30 L440,30 L440,20 L480,20 L480,30 L520,30 L520,25 L560,25 L560,30 L600,30 L600,35 L640,35 L640,30 L680,30 L680,25 L720,25 L720,30 L760,30 L760,20 L800,20 L800,30 L840,30 L840,25 L880,25 L880,30 L920,30 L920,35 L960,35 L960,30 L1000,30 L1000,25 L1040,25 L1040,30 L1080,30 L1080,20 L1120,20 L1120,30 L1160,30 L1160,25 L1200,25 L1200,60 Z" fill="#0A0F16"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="platform-workflow-section" data-layout-spec="פלטפורמה-workflow">
+  <div class="platform-workflow-container">
+    <div class="platform-workflow-intro">
+      <h2>תהליך פשוט שמתאים לאימון אמיתי</h2>
+      <p>מרישום אימון ועד לסקירת שימוש בציוד, התהליך נשאר צפוי ומובנה.</p>
+    </div>
+
+    <div class="platform-workflow-timeline">
+      <div class="platform-workflow-connector"></div>
+
+      <div class="platform-workflow-step">
+        <div class="platform-workflow-badge">1</div>
+        <div class="platform-workflow-content">
+          <h3>הוספת אימון</h3>
+          <p>פתח את הגיליון האישי שלך ורשום את האימון החדש עם תאריך ושם התרגיל. המערכת מזהה אוטומטית את סוג הציוד.</p>
+        </div>
+        <div class="platform-workflow-thumbnail">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="112" height="72" fill="rgba(16,26,36,0.70)" stroke="var(--border-dark)" stroke-width="1" rx="4"></rect>
+            <line x1="4" y1="20" x2="116" y2="20" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="40" y1="4" x2="40" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="80" y1="4" x2="80" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <circle cx="20" cy="12" r="2" fill="var(--primary)"></circle>
+            <circle cx="60" cy="12" r="2" fill="var(--accent)"></circle>
+            <rect x="10" y="28" width="24" height="6" fill="rgba(0,212,255,0.25)" rx="1"></rect>
+            <rect x="10" y="40" width="24" height="6" fill="rgba(182,255,77,0.20)" rx="1"></rect>
+            <rect x="46" y="28" width="28" height="6" fill="rgba(255,255,255,0.12)" rx="1"></rect>
+            <rect x="46" y="40" width="28" height="6" fill="rgba(255,255,255,0.12)" rx="1"></rect>
+          </svg>
+        </div>
+      </div>
+
+      <div class="platform-workflow-step">
+        <div class="platform-workflow-badge">2</div>
+        <div class="platform-workflow-content">
+          <h3>סימון השלמה</h3>
+          <p>לחץ על התא המתאים כדי לסמן את התרגיל כ"הושלם". התאריך מתעדכן באופן אוטומטי ומתחיל לספור ימים מאז השימוש.</p>
+        </div>
+        <div class="platform-workflow-thumbnail">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="112" height="72" fill="rgba(16,26,36,0.70)" stroke="var(--border-dark)" stroke-width="1" rx="4"></rect>
+            <line x1="4" y1="20" x2="116" y2="20" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="40" y1="4" x2="40" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="80" y1="4" x2="80" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <circle cx="20" cy="12" r="2" fill="var(--accent)"></circle>
+            <path d="M18,32 L22,36 L28,28" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            <rect x="46" y="28" width="28" height="6" fill="rgba(182,255,77,0.30)" rx="1"></rect>
+            <rect x="86" y="28" width="24" height="6" fill="rgba(182,255,77,0.25)" rx="1"></rect>
+          </svg>
+        </div>
+      </div>
+
+      <div class="platform-workflow-step">
+        <div class="platform-workflow-badge">3</div>
+        <div class="platform-workflow-content">
+          <h3>סקירת אותות זמן</h3>
+          <p>בדוק את העמודה "ימים מאז" כדי לזהות ציוד שלא השתמשת בו זמן רב. הערכים מסומנים בצבע כדי להדגיש פערים.</p>
+        </div>
+        <div class="platform-workflow-thumbnail">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="112" height="72" fill="rgba(16,26,36,0.70)" stroke="var(--border-dark)" stroke-width="1" rx="4"></rect>
+            <line x1="4" y1="20" x2="116" y2="20" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="40" y1="4" x2="40" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="80" y1="4" x2="80" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <text x="95" y="36" font-size="10" fill="var(--accent)" text-anchor="middle" font-family="monospace">3</text>
+            <text x="95" y="48" font-size="10" fill="rgba(255,182,77,0.85)" text-anchor="middle" font-family="monospace">12</text>
+            <text x="95" y="60" font-size="10" fill="rgba(255,77,77,0.85)" text-anchor="middle" font-family="monospace">28</text>
+            <rect x="86" y="30" width="20" height="8" fill="none" stroke="var(--accent)" stroke-width="1" rx="2"></rect>
+            <rect x="86" y="42" width="20" height="8" fill="none" stroke="rgba(255,182,77,0.60)" stroke-width="1" rx="2"></rect>
+            <rect x="86" y="54" width="20" height="8" fill="none" stroke="rgba(255,77,77,0.60)" stroke-width="1" rx="2"></rect>
+          </svg>
+        </div>
+      </div>
+
+      <div class="platform-workflow-step">
+        <div class="platform-workflow-badge">4</div>
+        <div class="platform-workflow-content">
+          <h3>שימוש בתובנות להתאמת האימון</h3>
+          <p>השתמש במידע הצבור כדי לאזן את תוכנית האימונים שלך ולהבטיח שכל קבוצת שרירים מקבלת תשומת לב מספקת.</p>
+        </div>
+        <div class="platform-workflow-thumbnail">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="112" height="72" fill="rgba(16,26,36,0.70)" stroke="var(--border-dark)" stroke-width="1" rx="4"></rect>
+            <line x1="4" y1="20" x2="116" y2="20" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="40" y1="4" x2="40" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <line x1="80" y1="4" x2="80" y2="76" stroke="var(--border-dark)" stroke-width="1"></line>
+            <path d="M10,60 Q20,35 30,50 T50,45 Q55,42 60,38" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"></path>
+            <circle cx="30" cy="50" r="2.5" fill="var(--primary)"></circle>
+            <circle cx="50" cy="45" r="2.5" fill="var(--accent)"></circle>
+            <circle cx="60" cy="38" r="2.5" fill="var(--secondary)"></circle>
+            <rect x="86" y="28" width="24" height="6" fill="rgba(0,212,255,0.30)" rx="1"></rect>
+            <rect x="86" y="40" width="24" height="6" fill="rgba(182,255,77,0.30)" rx="1"></rect>
+            <rect x="86" y="52" width="24" height="6" fill="rgba(124,58,237,0.30)" rx="1"></rect>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="platform-workflow-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 1200 60" preserveaspectratio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="scanBeam" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:rgba(0,212,255,0);stop-"></stop>
+          <stop offset="15%" style="stop-color:rgba(0,212,255,0.18);stop-opacity:1"></stop>
+          <stop offset="30%" style="stop-color:rgba(0,212,255,0.35);stop-opacity:1"></stop>
+          <stop offset="50%" style="stop-color:rgba(182,255,77,0.28);stop-opacity:1"></stop>
+          <stop offset="70%" style="stop-color:rgba(124,58,237,0.22);stop-opacity:1"></stop>
+          <stop offset="85%" style="stop-color:rgba(0,212,255,0.12);stop-opacity:1"></stop>
+          <stop offset="100%" style="stop-color:rgba(0,212,255,0);stop-"></stop>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="1200" height="60" fill="url(#scanBeam)"></rect>
+      <path d="M0,60 L0,30 L1200,30 L1200,60 Z" fill="var(--bg-light)"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="platform-case-studies-section" data-layout-spec="פלטפורמה-case-studies">
+  <div class="platform-case-studies-container">
+    <div class="platform-case-studies-intro">
+      <h2>מה משתפר כשהמעקב נקי</h2>
+      <p>כשההיסטוריה מסודרת, החלטות האימון נעשות מהר יותר ועקביות יותר.</p>
+    </div>
+
+    <div class="platform-case-studies-cards">
+      <!-- Case Study 1 -->
+      <article class="platform-case-study-card">
+        <div class="platform-case-study-header">
+          <h3>צמצום החמצת רוטציית ציוד</h3>
+          <p>מאמן כוח שעבר למעקב דיגיטלי גילה שמתאמנים מדלגים על מכשירים שלמים במחזורי אימון. עם חישוב ימים אוטומטי, הוא מזהה ציוד שלא נגעו בו יותר מ-10 ימים ומתקן את התכנית בזמן אמת.</p>
+        </div>
+        <div class="platform-case-study-metrics">
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">תרגילים שדולגו</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">12</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">2</span>
+            </div>
+          </div>
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">זמן זיהוי פערים</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">3 ימים</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">30 שניות</span>
+            </div>
+          </div>
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">כיסוי ציוד מלא</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">68%</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">94%</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Case Study 2 -->
+      <article class="platform-case-study-card">
+        <div class="platform-case-study-header">
+          <h3>שיפור עקביות המתאמנים</h3>
+          <p>מאמנת אישית עברה ממעקב ידני בנוטבוק לפלטפורמה דיגיטלית. היא גילתה שמתאמנים מגיעים לאימונים יותר מוכנים כשהם רואים את ההיסטוריה שלהם בצורה ויזואלית. הימים מאז תרגיל אחרון הפכו למוטיבציה חזקה.</p>
+        </div>
+        <div class="platform-case-study-metrics">
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">אחוז נוכחות שבועי</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">72%</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">89%</span>
+            </div>
+          </div>
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">זמן הכנת אימון</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">15 דק׳</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">4 דק׳</span>
+            </div>
+          </div>
+          <div class="platform-case-metric">
+            <div class="platform-case-metric-label">שימור מתאמנים</div>
+            <div class="platform-case-metric-value">
+              <span class="platform-case-metric-before">6 חודשים</span>
+              <svg data-no-icon-edit="true" aria-hidden="true" class="platform-case-metric-arrow" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L8 4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="platform-case-metric-after">11+ חודשים</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Bottom Divider: Soft Dark Vignette Fade -->
+  <div class="platform-case-studies-divider-wrapper">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewbox="0 0 1200 100" preserveaspectratio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="platform-case-vignette-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:var(--bg-light);stop-opacity:1"></stop>
+          <stop offset="100%" style="stop-color:var(--bg-dark);stop-opacity:1"></stop>
+        </linearGradient>
+      </defs>
+      <path d="M0,100 L0,0 L1200,0 L1200,100 Z" fill="#0A0F16"></path>
+    </svg>
+  </div>
+</section>
+
+<section class="platform-cta-section" data-layout-spec="פלטפורמה-cta">
+  <div class="platform-cta-container">
+    <div class="platform-cta-content">
+      <h2 class="platform-cta-title">צפו בדוגמה מותאמת למתאמנים שלכם</h2>
+      <p class="platform-cta-text">נעבור יחד על מבנה לדוגמה ונראה איך אותות שימוש בציוד מופיעים לאורך זמן. המערכת מציגה בצורה ברורה מתי כל ציוד שימש לאחרונה ועוזרת לתכנן אימונים מאוזנים יותר.</p>
+      <div class="platform-cta-buttons">
+        <a href="/contact" class="btn-primary">
+          <span>צרו קשר</span>
+          <svg width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-element-type="icon" data-icon-type="svg">
+            <path d="M8 2L2 8L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </a>
+        <a href="/about" class="btn-secondary">
+          <span>על הצוות</span>
+        </a>
+      </div>
+    </div>
+    <div class="platform-cta-panel">
+      <svg class="signal-panel" viewbox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" data-no-icon-edit="true" aria-hidden="true">
+        <!-- Three horizontal bars -->
+        <rect x="20" y="30" width="240" height="8" rx="4" fill="rgba(0,229,255,0.25)"></rect>
+        <rect x="20" y="30" width="180" height="8" rx="4" fill="url(#barGradient1)"></rect>
+        
+        <rect x="20" y="70" width="240" height="8" rx="4" fill="rgba(0,229,255,0.25)"></rect>
+        <rect x="20" y="70" width="210" height="8" rx="4" fill="url(#barGradient2)"></rect>
+        
+        <rect x="20" y="110" width="240" height="8" rx="4" fill="rgba(0,229,255,0.25)"></rect>
+        <rect x="20" y="110" width="140" height="8" rx="4" fill="url(#barGradient3)"></rect>
+        
+        <!-- Sparkline -->
+        <polyline points="20,150 40,145 60,155 80,140 100,148 120,135 140,142 160,130 180,138 200,125 220,132 240,120 260,128" stroke="url(#sparklineGradient)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        
+        <!-- Heat strip (small rectangles) -->
+        <g class="heat-strip">
+          <rect x="20" y="175" width="12" height="12" rx="2" fill="rgba(183,255,42,0.85)"></rect>
+          <rect x="36" y="175" width="12" height="12" rx="2" fill="rgba(183,255,42,0.70)"></rect>
+          <rect x="52" y="175" width="12" height="12" rx="2" fill="rgba(0,229,255,0.60)"></rect>
+          <rect x="68" y="175" width="12" height="12" rx="2" fill="rgba(0,229,255,0.45)"></rect>
+          <rect x="84" y="175" width="12" height="12" rx="2" fill="rgba(124,44,255,0.40)"></rect>
+          <rect x="100" y="175" width="12" height="12" rx="2" fill="rgba(124,44,255,0.30)"></rect>
+          <rect x="116" y="175" width="12" height="12" rx="2" fill="rgba(255,255,255,0.15)"></rect>
+          <rect x="132" y="175" width="12" height="12" rx="2" fill="rgba(255,255,255,0.12)"></rect>
+          <rect x="148" y="175" width="12" height="12" rx="2" fill="rgba(255,255,255,0.10)"></rect>
+          <rect x="164" y="175" width="12" height="12" rx="2" fill="rgba(255,255,255,0.08)"></rect>
+        </g>
+        
+        <!-- Glow effects -->
+        <circle cx="200" cy="34" r="6" fill="#00E5FF" opacity="0.6" filter="url(#glow)"></circle>
+        <circle cx="230" cy="74" r="6" fill="#B7FF2A" opacity="0.5" filter="url(#glow)"></circle>
+        <circle cx="160" cy="114" r="6" fill="#7C2CFF" opacity="0.4" filter="url(#glow)"></circle>
+        
+        <!-- Gradients and filters -->
+        <defs>
+          <linearGradient id="barGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"></stop>
+            <stop offset="100%" stop-color="#00E5FF" stop-opacity="0.3"></stop>
+          </linearGradient>
+          <linearGradient id="barGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#B7FF2A" stop-opacity="0.85"></stop>
+            <stop offset="100%" stop-color="#B7FF2A" stop-opacity="0.25"></stop>
+          </linearGradient>
+          <linearGradient id="barGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7C2CFF" stop-opacity="0.80"></stop>
+            <stop offset="100%" stop-color="#7C2CFF" stop-opacity="0.20"></stop>
+          </linearGradient>
+          <linearGradient id="sparklineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00E5FF"></stop>
+            <stop offset="50%" stop-color="#B7FF2A"></stop>
+            <stop offset="100%" stop-color="#7C2CFF"></stop>
+          </linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stddeviation="3" result="coloredBlur"></feGaussianBlur>
+            <feMerge>
+              <feMergeNode in="coloredBlur"></feMergeNode>
+              <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</section>
+  </main>
+  
+  <footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-top">
+      <div class="footer-column footer-about">
+        <img src="/assets/business-logo.webp" alt="מעקב כש&quot;ג ייעודית" class="logo">
+        <p class="footer-description">פלטפורמה מתקדמת למעקב ואימון כושר ייעודי, המסייעת לכם להשיג את יעדי הכושר שלכם בצורה מקצועית ויעילה.</p>
+      </div>
+      
+      <div class="footer-column footer-links">
+        <h3 class="footer-title">קישורים מהירים</h3>
+        <ul class="footer-nav">
+          <li><a href="/platform">פלטפורמה</a></li>
+          <li><a href="/about">אודות</a></li>
+          <li><a href="/contact">צור קשר</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-column footer-contact">
+        <h3 class="footer-title">יצירת קשר</h3>
+        <ul class="contact-list">
+          <li>
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:[business_email]">[business_email]</a>
+          </li>
+          <li>
+            <i class="fas fa-phone"></i>
+            <a href="tel:[business_phone]">[business_phone]</a>
+          </li>
+          <li><a href="/"><i class="fas fa-map-marker-alt"></i>
+            <span>[business_address]</span></a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-column footer-social">
+        <h3 class="footer-title">עקבו אחרינו</h3>
+        <div class="social-links">
+          <a href="[facebook_handle]" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="[instagram_handle]" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="[whatsapp_handle]" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p class="copyright">© 2026 מעקב כש"ג ייעודית. כל הזכויות שמורות.</p>
+        <div class="footer-bottom-links">
+          <nav class="legal-links">
+            <a href="/privacy">מדיניות פרטיות</a>
+            <span class="separator">•</span>
+            <a href="/terms">תנאי שימוש</a>
+            <span class="separator">•</span>
+            <a href="/accessibility">נגישות</a>
+          </nav>
+          <a href="https://zappy5.com" target="_blank" rel="noopener noreferrer" class="zappy-attribution">נוצר באמצעות Zappy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+  
+  <a href="https://wa.me/[whatsapp_handle]" class="whatsapp-float" aria-label="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  
+  <div data-integration="accessibility:toolbar"></div>
+
+    <script src="/script.js"></script>
+
+    <script id="zappy-mobile-submenu-script">
+    (function() {
+      function initMobileSubmenuToggles() {
+        if (window.innerWidth > 768) {
+          document.querySelectorAll('.mobile-submenu-toggle').forEach(function(btn) { btn.remove(); });
+          document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) { menu.classList.remove('mobile-expanded'); });
+          return;
+        }
+        var items = document.querySelectorAll('.nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu)');
+        items.forEach(function(li) {
+          if (li.querySelector('.mobile-submenu-toggle')) return;
+          var submenu = li.querySelector('.sub-menu');
+          var parentLink = li.querySelector(':scope > a');
+          if (!submenu || !parentLink) return;
+          var toggleBtn = document.createElement('button');
+          toggleBtn.className = 'mobile-submenu-toggle';
+          toggleBtn.setAttribute('aria-label', 'Toggle submenu');
+          toggleBtn.setAttribute('type', 'button');
+          parentLink.insertAdjacentElement('afterend', toggleBtn);
+          toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) {
+              if (menu !== submenu) { menu.classList.remove('mobile-expanded'); var t = menu.parentElement.querySelector('.mobile-submenu-toggle'); if(t) t.classList.remove('expanded'); }
+            });
+            submenu.classList.toggle('mobile-expanded');
+            toggleBtn.classList.toggle('expanded');
+          });
+        });
+      }
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMobileSubmenuToggles); }
+      else { initMobileSubmenuToggles(); }
+      var resizeTimer; window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(initMobileSubmenuToggles, 250); });
+      // Re-initialize when mobile menu becomes visible (MutationObserver)
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes') {
+            var target = mutation.target;
+            if (target.classList && (target.classList.contains('active') || target.classList.contains('open'))) {
+              setTimeout(initMobileSubmenuToggles, 100);
+            }
+          }
+        });
+      });
+      setTimeout(function() {
+        document.querySelectorAll('.mobile-menu, .nav-menu, #navMenu, nav').forEach(function(menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ['class', 'style'] });
+        });
+      }, 500);
+    })();
+    </script>
+</body>
+</html>

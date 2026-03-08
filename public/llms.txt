@@ -1,0 +1,57 @@
+# מעקב כש"ג ייעודית — Generative Engine Optimization Map
+
+> A fitness tracking platform that monitors workout exercises for individual trainees. The system manages personal training records in a spreadsheet-like interface, tracking exercise names, completion dates, and automatically calculating days since last equipment use. It provides structured workout history and equipment usage monitoring for each trainee.
+
+---
+
+## Pages
+
+### בית
+https://-fdaa30c4.zappy5.app
+פלטפורמת מעקב אימונים דיגיטלי המתעדת כל תרגיל ומחשבת אוטומטית ימים מאז שימוש אחרון בציוד. נהל את היסטוריית האימונים שלך בממשק פשוט וחכם.
+
+### פלטפורמה
+https://-fdaa30c4.zappy5.app/platform
+גלה מערכת ניהול מתאמנים אונליין עם ממשק דמוי גיליון אלקטרוני, מעקב אחר תאריכי השלמת תרגילים וחישוב אוטומטי של שימוש בציוד. התחל לעקוב היום!
+
+### אודות
+https://-fdaa30c4.zappy5.app/about
+למד על הפלטפורמה שמשנה את הדרך שבה מתאמנים עוקבים אחר התקדמותם. מעקב אימונים דיגיטלי שנבנה במיוחד עבור מתאמנים רציניים כמוך.
+
+### צור קשר
+https://-fdaa30c4.zappy5.app/contact
+יש לך שאלות על מעקב אימונים? צור קשר עכשיו וגלה איך המערכת שלנו תעזור לך לנהל תיעוד תרגילים וחיזוק שרירים בצורה המקצועית ביותר.
+
+## Legal & Policy
+
+### Privacy Policy
+https://-fdaa30c4.zappy5.app/privacy
+Information about how user data is collected, stored, and protected.
+
+### Terms & Conditions
+https://-fdaa30c4.zappy5.app/terms
+Legal terms describing service usage, rights, and policies.
+
+### Accessibility Statement
+https://-fdaa30c4.zappy5.app/accessibility
+Information about WCAG compliance and accessibility features.
+
+---
+
+# Business Context (for LLM understanding)
+
+## About מעקב כש"ג ייעודית
+A fitness tracking platform that monitors workout exercises for individual trainees. The system manages personal training records in a spreadsheet-like interface, tracking exercise names, completion dates, and automatically calculating days since last equipment use. It provides structured workout history and equipment usage monitoring for each trainee.
+
+## Target Audience
+מתאמנים
+
+## Industry
+כושר ואימונים
+
+---
+
+# Additional Resources
+
+- **Sitemap**: https://-fdaa30c4.zappy5.app/sitemap.xml
+- **Robots.txt**: https://-fdaa30c4.zappy5.app/robots.txt
