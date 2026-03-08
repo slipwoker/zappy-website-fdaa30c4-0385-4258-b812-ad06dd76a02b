@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://maakav-kashag-yieudit.zappy5.app/sitemap.xml
