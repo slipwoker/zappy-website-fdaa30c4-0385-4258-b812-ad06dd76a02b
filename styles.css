@@ -6189,6 +6189,293 @@ body.accessibility-widget-visible ._access-menu {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   V2 REGENERATED SECTION CSS (בית-hero)
+   Added: 2026-03-08T15:25:02.647Z
+   ═══════════════════════════════════════════════════════════ */
+.index-hero-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  isolation: isolate;
+  background-color: #0A0F16;
+}
+
+.index-hero-section__bg-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.index-hero-section__bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.index-hero-section__scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background-color: #0A0F16;
+  background-image: 
+    radial-gradient(circle at 80% 20%, rgba(0,212,255,0.18) 0%, transparent 45%),
+    radial-gradient(circle at 20% 80%, rgba(124,58,237,0.15) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(10,15,22,0.45) 0%, rgba(10,15,22,0.75) 50%, rgba(10,15,22,0.92) 100%);
+}
+
+.index-hero-section__content-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 140px 24px 80px;
+}
+
+.index-hero-section__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 48px;
+  text-align: right;
+  direction: rtl;
+}
+
+.index-hero-section__text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+}
+
+.index-hero-section__headline {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--text-light);
+  text-shadow: 0 12px 30px rgba(0,0,0,0.70);
+  margin: 0;
+}
+
+.index-hero-section__subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.00em;
+  line-height: 1.35;
+  color: rgba(243,247,255,0.92);
+  text-shadow: 0 10px 22px rgba(0,0,0,0.65);
+  margin: 0;
+  max-width: 720px;
+}
+
+.index-hero-section__cta-group {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.index-hero-section__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  font-size: 16px;
+  text-decoration: none;
+  transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease, border-color 220ms ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.index-hero-section__btn--primary {
+  background: rgba(6,10,16,0.55);
+  color: var(--text-light);
+  border: 2px solid rgba(0,229,255,0.95);
+  box-shadow: 0 0 0 1px rgba(0,229,255,0.20) inset, 0 10px 26px rgba(0,0,0,0.45);
+}
+
+.index-hero-section__btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(0,229,255,0.30) inset, 0 14px 32px rgba(0,0,0,0.55), 0 0 28px rgba(0,229,255,0.22);
+  background: rgba(6,10,16,0.70);
+  border-color: rgba(0,229,255,1);
+}
+
+.index-hero-section__btn--secondary {
+  background: rgba(10,15,22,0.70);
+  color: var(--text-light);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+}
+
+.index-hero-section__btn--secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.45);
+  background: rgba(10,15,22,0.85);
+  border-color: rgba(255,255,255,0.28);
+}
+
+.index-hero-section__metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.index-hero-section__metric-card {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(16,26,36,0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+  transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+
+.index-hero-section__metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  background: rgba(16,26,36,0.65);
+}
+
+.index-hero-section__metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: rgba(0,229,255,0.12);
+  border: 1px solid rgba(0,229,255,0.35);
+  color: #00E5FF;
+  flex-shrink: 0;
+}
+
+.index-hero-section__metric-icon svg {
+  display: block;
+}
+
+.index-hero-section__metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  flex: 1;
+  min-width: 0;
+}
+
+.index-hero-section__metric-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(234,241,255,0.92);
+  margin: 0;
+}
+
+.index-hero-section__metric-value {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-light);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+@media (max-width: 768px) {
+  .index-hero-section {
+    min-height: 100vh;
+  }
+  
+  .index-hero-section__content-wrapper {
+    padding: 120px 16px 60px;
+  }
+  
+  .index-hero-section__content {
+    gap: 36px;
+  }
+  
+  .index-hero-section__text-group {
+    gap: 16px;
+  }
+  
+  .index-hero-section__headline {
+    font-size: 36px;
+    line-height: 1.1;
+  }
+  
+  .index-hero-section__subtitle {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+  
+  .index-hero-section__cta-group {
+    width: 100%;
+    gap: 12px;
+  }
+  
+  .index-hero-section__btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+  
+  .index-hero-section__metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  
+  .index-hero-section__metric-card {
+    padding: 14px 16px;
+  }
+  
+  .index-hero-section__metric-icon {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .index-hero-section__metric-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .index-hero-section__metric-label {
+    font-size: 11px;
+  }
+  
+  .index-hero-section__metric-value {
+    font-size: 18px;
+  }
+}
+
 /* ========== RTL MOBILE NAVBAR FIX (zappy-rtl-mobile-fix) ========== */
 /* High-specificity rules to ensure RTL positioning wins over any [lang="en"] conflicts */
 /* For RTL sites: hamburger on RIGHT, phone on LEFT (mirror of LTR layout) */
